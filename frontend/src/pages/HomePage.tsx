@@ -2,7 +2,11 @@ import React from 'react'
 
 const HomePage = () => {
   return (
-    <div>HomePage</div>
+    <div>
+      <div className='flex justify-center items-center h-screen'>
+        
+      </div>
+    </div>
   )
 }
 

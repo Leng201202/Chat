@@ -73,18 +73,21 @@ export const login=async (req,res)=>{
         return res.status(500).json({message:"Internal server error"});
     }
 }
-export const logout=(req,res)=>{
+export const logout = (req, res) => {
     try {
-        res.cookie('token',{
-            maxAge:0,
-        })
-        return res.status(200).json({message:"Logged out successfully"});
-        
+        // Cookie set in generateToken uses the name "jwt". We must clear the same name
+        // and use identical cookie attribute values (path, sameSite, secure, httpOnly) so the browser accepts the deletion.
+        res.clearCookie("jwt", {
+            httpOnly: true,
+            sameSite: "strict",
+            secure: process.env.NODE_ENV !== "production",
+        });
+        return res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
-        console.log("Error in logout controller : "+error);
-        return res.status(500).json({message:"Internal server error"}); 
+        console.log("Error in logout controller : " + error);
+        return res.status(500).json({ message: "Internal server error" });
     }
-}
+};
 export const updateProfile=async (req,res)=>{
     try {
         const {profilePic}=req.body;
@@ -93,8 +96,12 @@ export const updateProfile=async (req,res)=>{
         if(!profilePic){
             return res.status(400).json({message:"Profile picture is required"});
         }
-        const upload=await cloudinary.uploader.upload(profilePic)
-        const updateUser= await User.findByIdAndUpdate(userId,{profilePic : uploadResponse.secure_url},{new:true});
+        // Basic size guard: data URL length rough check (~4/3 of bytes)
+        if (profilePic.length > 5 * 1024 * 1024) { // >5MB as string length approximation
+            return res.status(413).json({message:"Image too large"});
+        }
+        const upload = await cloudinary.uploader.upload(profilePic);
+        const updateUser= await User.findByIdAndUpdate(userId,{profilePic : upload.secure_url},{new:true});
         res.status(200).json({message:"Profile updated successfully",user:updateUser});
     } catch (error) {
         console.log("Error in updateProfile controller : "+error);
