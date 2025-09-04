@@ -13,20 +13,21 @@ export interface Message {
   _id: string;
   senderId: string;
   receiverId: string;
-  content: string;
-  timestamp: string;
+  text: string;
+  image?: string;
+  createdAt?: string; // backend may provide
+  updatedAt?: string; // backend may provide
 }
 
 export interface SendMessageData {
-  content: string;
-  // add additional fields your API expects here (e.g. attachments, metadata)
-  [key: string]: any;
+  text: string;
+  image?: string | null;
 }
 
 interface ChatStoreState {
   messages: Message[];
   users: ChatUser[];
-  selectedUser: ChatUser | null;
+  selectedUser: ChatUser | null | any;
   isUsersLoading: boolean;
   isMessagesLoading: boolean;
   usersError: string | null;
@@ -76,11 +77,16 @@ sendMessage: async (messageData: SendMessageData) => {
       toast.error("No user selected");
       return;
     }
+    if(!messageData.text && !messageData.image){
+      return; // nothing to send
+    }
     try {
       const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData);
-      set({ messages: [...messages, res.data] });
+      console.log(messageData)
+      console.log("Message sent:", res.data);
+      set({ messages: [res.data] });
     } catch (error: any) {
-      console.error(error.response.data.message);
+      console.error(error);
     }
   },
 

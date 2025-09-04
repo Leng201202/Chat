@@ -9,11 +9,13 @@ const Navbar = () => {
       <div className="container mx-auto px-4 h-16">
         <div className="flex items-center justify-between h-full">
           <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-all">
-              <div className="size-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                <BotMessageSquare className="w-6 h-6 text-primary"/>
-              </div>
-            </Link>
+            
+            <div className="size-9 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-all">
+                <BotMessageSquare className="text-primary"/>
+              </Link>
+            </div>
+            
           </div>
           <div className="flex items-center gap-2">
             {authUser && (
