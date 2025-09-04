@@ -28,15 +28,20 @@ function App() {
     
   }
   return (
-    <div data-theme={theme}>
+    <div data-theme={theme} className="min-h-screen flex flex-col bg-base-300">
       <Navbar />
-      <Routes>
-        <Route path="/" element={authUser ? <HomePage/> : <Navigate to="/login"/>} />
-        <Route path="/login" element={!authUser ? <LoginPage/> : <Navigate to="/"/>} />
-        <Route path="/signup" element={!authUser ? <SignupPage/>:<Navigate to="/"/>} />
-        <Route path="/setting" element={authUser ? <SettingPage/>: <Navigate to="/login"/>} />
-        <Route path='/profile' element={authUser ? <ProfilePage/>:<Navigate to="/login"/>} />
-      </Routes>
+      <main className="flex-1 flex justify-center px-4">
+        {/* page content wrapper */}
+        <div className="w-full max-w-3xl py-8">
+          <Routes>
+            <Route path="/" element={authUser ? <HomePage/> : <Navigate to="/login"/>} />
+            <Route path="/login" element={!authUser ? <LoginPage/> : <Navigate to="/"/>} />
+            <Route path="/signup" element={!authUser ? <SignupPage/>:<Navigate to="/"/>} />
+            <Route path="/setting" element={authUser ? <SettingPage/>: <Navigate to="/login"/>} />
+            <Route path='/profile' element={authUser ? <ProfilePage/>:<Navigate to="/login"/>} />
+          </Routes>
+        </div>
+      </main>
       <Toaster/>
     </div>
   )

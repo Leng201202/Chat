@@ -21,7 +21,8 @@ const PORT = process.env.PORT || 8000;
 
 // Routes
 app.use('/api/auth', authRoute);
-app.use('api/messages',messageRoute);
+// NOTE: missing leading slash caused 404 for /api/messages/* endpoints
+app.use('/api/messages', messageRoute);
 
 app.get('/',(req,res)=>{
     res.send('Hello World!');
