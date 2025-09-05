@@ -20,7 +20,7 @@ const __dirname = path.resolve();
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
   : (process.env.NODE_ENV === "production"
-      ? ["https://chatkie.netlify.app", "https://chatkie.onrender.com"]
+      ? ["https://chatkie.netlify.app", "https://chatkie.onrender.com", "https://chatky.onrender.com"]
       : ["http://localhost:3000", "http://localhost:5173"]);
 
 console.log('CORS allowed origins:', allowedOrigins);
@@ -34,10 +34,19 @@ app.use(
       if (!origin) return callback(null, true);
 
       console.log('Request origin:', origin);
-
-      if (allowedOrigins.indexOf(origin) === -1) {
-        const msg =
-          "The CORS policy for this site does not allow access from the specified Origin.";
+      
+      // More flexible origin checking - allow any that contain the core domains
+      const isAllowed = 
+        // Exact match in the allowed origins list
+        allowedOrigins.includes(origin) ||
+        // Check if origin contains any of our known domains (chatkie/chatky/localhost)
+        /chatk(ie|y)\./.test(origin) || 
+        /localhost/.test(origin) ||
+        // In development, be more permissive
+        process.env.NODE_ENV !== "production";
+        
+      if (!isAllowed) {
+        const msg = "The CORS policy for this site does not allow access from the specified Origin.";
         console.warn(`CORS blocked origin: ${origin}`);
         return callback(new Error(msg), false);
       }
@@ -45,7 +54,7 @@ app.use(
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
+    allowedHeaders: ["Content-Type", "Authorization", "Content-Length", "X-Requested-With"]
   })
 );
 
