@@ -10,7 +10,7 @@ import cors from 'cors';
 dotenv.config();
 const app = express();
 app.set('trust proxy', 1); // trust first proxy
-const allowedOrigins=['https://chatkie.netlify.app','http://localhost:3000'];
+const allowedOrigins=['https://chatkie.netlify.app','http://localhost:3000','http://localhost:5000'];
 
 const corsOptions = {
     origin(origin,cb){
@@ -18,7 +18,7 @@ const corsOptions = {
         const ok=allowedOrigins.some(o=>o instanceof RegExp ? o.test(origin) : o===origin);
         cb(ok ? null : new Error('Not allowed by CORS'),ok);
     },
-    cridentials:true,
+    credentials:true,
     methods:['GET','POST','PUT','DELETE'],
     allowedHeaders:['Content-Type','Authorization'] 
 };
@@ -34,9 +34,9 @@ app.use(cookieParser());
 const PORT = process.env.PORT || 8000;
 
 // Routes
-app.use('/api/auth', authRoute);
+app.use('/api/auth/*', authRoute);
 // NOTE: missing leading slash caused 404 for /api/messages/* endpoints
-app.use('/api/messages', messageRoute);
+app.use('/api/messages/*', messageRoute);
 
 app.get('/',(req,res)=>{
     res.send('Hello World!');
