@@ -9,10 +9,24 @@ import cors from 'cors';
 
 dotenv.config();
 const app = express();
-app.use(cors({
-    origin: 'https://chatkie.netlify.app/',
-    credentials: true,
-}));
+app.set('trust proxy', 1); // trust first proxy
+const allowedOrigins=['https://chatkie.netlify.app','http://localhost:3000'];
+
+const corsOptions = {
+    origin(origin,cb){
+        if(!origin) return cb(null,true);
+        const ok=allowedOrigins.some(o=>o instanceof RegExp ? o.test(origin) : o===origin);
+        cb(ok ? null : new Error('Not allowed by CORS'),ok);
+    },
+    cridentials:true,
+    methods:['GET','POST','PUT','DELETE'],
+    allowedHeaders:['Content-Type','Authorization'] 
+};
+
+app.use(cors(corsOptions));
+app.options('*',cors(corsOptions));
+
+
 // Middleware for parsing JSON and URL-encoded bodies with increased limits for base64 image uploads
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
