@@ -3,7 +3,11 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { io, Socket } from "socket.io-client";
 
-const BASE_URL = import.meta.env.MODE === 'production' ?  'http://localhost:8000' : '/';
+// Socket.io base URL - use environment variable if available
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 
+                   (import.meta.env.MODE === 'development' 
+                    ? 'http://localhost:8000' 
+                    : window.location.origin);
 // Align with backend signup/login response fields
 type AuthUser = {
   _id: string;
@@ -54,10 +58,10 @@ const useUserAuthStore = create<AuthState>((set,get) => ({
   onlineUsers: [],
   checkAuth: async () => { 
     try {
-      const res = await axiosInstance.get("/api/auth/check");
+      const res = await axiosInstance.get("/auth/check");
       const user = res.data;
       set({ authUser: user });
-      get().connectSocket(); // <-- added
+      get().connectSocket(); 
     } catch (err) {
       set({ authUser: null });
     } finally {
@@ -74,7 +78,7 @@ const useUserAuthStore = create<AuthState>((set,get) => ({
         password: data.password,
       };
       console.log("Signup payload actually sent:", payload);
-      const res = await axiosInstance.post("/api/auth/signup", payload);
+      const res = await axiosInstance.post("/auth/signup", payload);
       set({ authUser: res.data });
       toast.success("Account created");
       get().connectSocket(); // <-- added
@@ -102,7 +106,7 @@ const useUserAuthStore = create<AuthState>((set,get) => ({
   login: async (data) => {
     set({ isLoggingIn: true });
     try {
-      const res= await axiosInstance.post("/api/auth/login", data);
+      const res= await axiosInstance.post("/auth/login", data);
       set({ authUser: res.data });
 
       toast.success("Logged in successfully");
@@ -118,7 +122,7 @@ const useUserAuthStore = create<AuthState>((set,get) => ({
 
   logout: async () => {
     try {
-      await axiosInstance.post("/api/auth/logout");
+      await axiosInstance.post("/auth/logout");
       set({ authUser: null });
       toast.success("Logged out successfully");
       get().disconnectSocket(); // <-- added
@@ -129,7 +133,7 @@ const useUserAuthStore = create<AuthState>((set,get) => ({
   updateProfile: async (data)=>{
     set({ isUpdatingProfile: true });
     try {
-      const res= await axiosInstance.put("/api/auth/update-profile", data); 
+      const res= await axiosInstance.put("/auth/update-profile", data); 
       // Backend returns: { message: string, user: {...updatedUser} }
       const updatedUser = (res.data && (res.data as any).user) ? (res.data as any).user : res.data;
       set(prev => ({
@@ -148,7 +152,7 @@ const useUserAuthStore = create<AuthState>((set,get) => ({
   connectSocket: () => {
     const {authUser} = get();
     if(!authUser || get().socket?.connected) return;
-    const socket = io(BASE_URL,{
+    const socket = io(SOCKET_URL,{
       query: { userId: authUser._id }
     });
     socket.connect();

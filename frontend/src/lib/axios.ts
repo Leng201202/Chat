@@ -1,7 +1,10 @@
 import axios from "axios";
 
-// Use environment variable if available, otherwise fallback to the hardcoded URL https://chatkie.onrender.com
-const apiBaseUrl =  import.meta.env.MODE === 'production' ? 'http://localhost:8000/api' : "/api";
+// Use environment variables or determine base URL based on environment
+const apiBaseUrl = import.meta.env.VITE_API_URL || 
+                  (import.meta.env.MODE === 'development' 
+                    ? 'http://localhost:8000' // Development - connect to local backend
+                    : ''); // Production - use relative URL (deployed alongside frontend)
 
 export const axiosInstance = axios.create({
   baseURL: apiBaseUrl,

@@ -52,7 +52,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
   getUsers: async () => {
     set({ isUsersLoading: true });
     try {
-      const res = await axiosInstance.get("/api/messages/users");
+      const res = await axiosInstance.get("/messages/users");
   const apiUsers = Array.isArray(res.data?.users) ? res.data.users : [];
   set({ users: apiUsers });
     } catch (error) {
@@ -65,7 +65,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
 getMessages: async (userId: string) => {
     set({ isMessagesLoading: true });
     try {
-        const res = await axiosInstance.get<{ messages: Message[] }>(`/api/messages/${userId}`);
+        const res = await axiosInstance.get<{ messages: Message[] }>(`/messages/${userId}`);
         // Check if res.data.messages exists and is an array
         if (res.data && res.data.messages && Array.isArray(res.data.messages)) {
             set({ messages: res.data.messages });
@@ -92,7 +92,7 @@ sendMessage: async (messageData: SendMessageData) => {
       return; // nothing to send
     }
     try {
-      const res = await axiosInstance.post(`/api/messages/send/${selectedUser._id}`, messageData);
+      const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData);
       console.log(messageData);
       console.log("Message sent:", res.data);
       // Append the new message to existing messages instead of replacing
