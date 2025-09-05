@@ -4,13 +4,13 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // Proxy only used for local development
   server:{
     proxy:{
       '/api': {
         target: 'https://chatkie.onrender.com',
-        changeOrigin:true,
+        changeOrigin: true,
       }
     }
   }
-
 })
