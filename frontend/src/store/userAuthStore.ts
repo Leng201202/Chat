@@ -48,7 +48,7 @@ const useUserAuthStore = create<AuthState>((set) => ({
   onlineUsers: [],
   checkAuth: async () => {
     try {
-      const res = await axiosInstance.get("/auth/check");
+      const res = await axiosInstance.get("/api/auth/check");
       const user = res.data;
       set({ authUser: user });
     } catch (err) {
@@ -67,7 +67,7 @@ const useUserAuthStore = create<AuthState>((set) => ({
         password: data.password,
       };
       console.log("Signup payload actually sent:", payload);
-      const res = await axiosInstance.post("/auth/signup", payload);
+      const res = await axiosInstance.post("/api/auth/signup", payload);
       set({ authUser: res.data });
       toast.success("Account created");
     } catch (error) {
@@ -94,7 +94,7 @@ const useUserAuthStore = create<AuthState>((set) => ({
   login: async (data) => {
     set({ isLoggingIn: true });
     try {
-      const res= await axiosInstance.post("/auth/login", data);
+      const res= await axiosInstance.post("/api/auth/login", data);
       set({ authUser: res.data });
 
       toast.success("Logged in successfully");
@@ -109,7 +109,7 @@ const useUserAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     try {
-      await axiosInstance.post("/auth/logout");
+      await axiosInstance.post("/api/auth/logout");
       set({ authUser: null });
       toast.success("Logged out successfully");
     } catch (error) {
@@ -119,7 +119,7 @@ const useUserAuthStore = create<AuthState>((set) => ({
   updateProfile: async (data)=>{
     set({ isUpdatingProfile: true });
     try {
-      const res= await axiosInstance.put("/auth/update-profile", data); 
+      const res= await axiosInstance.put("/api/auth/update-profile", data); 
       // Backend returns: { message: string, user: {...updatedUser} }
       const updatedUser = (res.data && (res.data as any).user) ? (res.data as any).user : res.data;
       set(prev => ({
