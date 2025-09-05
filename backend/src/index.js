@@ -7,9 +7,10 @@ import { connectDB } from './lib/db.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { io, app, server } from './lib/socket.js';
+import  path  from 'path';
 
 dotenv.config();
-
+const __dirname = path.resolve(); // Get current directory
 app.set('trust proxy', 1); // trust first proxy
 const allowedOrigins=['https://chatkie.netlify.app','http://localhost:3000','http://localhost:5000','http://localhost:5173/'];
 
@@ -38,11 +39,12 @@ const PORT = process.env.PORT || 8000;
 app.use('/api/auth', authRoute);
 // NOTE: missing leading slash caused 404 for /api/messages/* endpoints
 app.use('/api/messages', messageRoute);
-
-app.get('/',(req,res)=>{
-    res.send('Hello World!');
-});
-
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../frontend/dist')));
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+    });
+}
 // Health check endpoint to verify database connection
 app.get('/health', async (req, res) => {
     try {
