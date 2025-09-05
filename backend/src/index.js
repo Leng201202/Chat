@@ -23,8 +23,8 @@ const corsOptions = {
     allowedHeaders:['Content-Type','Authorization'] 
 };
 
+// Enable CORS with configured options
 app.use(cors(corsOptions));
-app.options('*',cors(corsOptions));
 
 
 // Middleware for parsing JSON and URL-encoded bodies with increased limits for base64 image uploads
