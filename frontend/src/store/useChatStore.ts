@@ -25,6 +25,7 @@ export interface SendMessageData {
 }
 
 interface ChatStoreState {
+  sendingMessage: boolean;
   messages: Message[];
   users: ChatUser[];
   selectedUser: ChatUser | null | any;
@@ -40,6 +41,7 @@ interface ChatStoreState {
 }
 
 export const useChatStore = create<ChatStoreState>((set, get) => ({
+  sendingMessage: false,
   messages: [],
   users: [],
   selectedUser: null,
@@ -63,16 +65,25 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
 getMessages: async (userId: string) => {
     set({ isMessagesLoading: true });
     try {
-        const res = await axiosInstance.get<Message[]>(`/api/messages/${userId}`);
-        set({ messages: res.data });
+        const res = await axiosInstance.get<{ messages: Message[] }>(`/api/messages/${userId}`);
+        // Check if res.data.messages exists and is an array
+        if (res.data && res.data.messages && Array.isArray(res.data.messages)) {
+            set({ messages: res.data.messages });
+        } else {
+            // Fallback to empty array if data structure is unexpected
+            console.error("Unexpected messages data structure:", res.data);
+            set({ messages: [] });
+        }
     } catch (error: any) {
         toast.error(error.response.data.message);
+        set({ messages: [] }); // Reset messages on error
     } finally {
         set({ isMessagesLoading: false });
     }
 },
 sendMessage: async (messageData: SendMessageData) => {
-    const { selectedUser, messages } = get();
+    set({ sendingMessage: true });
+    const { selectedUser,  } = get();
     if (!selectedUser) {
       toast.error("No user selected");
       return;
@@ -82,11 +93,17 @@ sendMessage: async (messageData: SendMessageData) => {
     }
     try {
       const res = await axiosInstance.post(`/api/messages/send/${selectedUser._id}`, messageData);
-      console.log(messageData)
+      console.log(messageData);
       console.log("Message sent:", res.data);
-      set({ messages: [res.data] });
+      // Append the new message to existing messages instead of replacing
+      set((state) => ({
+        messages: [...state.messages, res.data]
+      }));
     } catch (error: any) {
       console.error(error);
+      toast.error("Failed to send message");
+    }finally{
+      set({ sendingMessage: false });
     }
   },
 

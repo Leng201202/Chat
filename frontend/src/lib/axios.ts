@@ -1,7 +1,8 @@
 import axios from "axios";
 
 // Use environment variable if available, otherwise fallback to the hardcoded URL
-const apiBaseUrl = import.meta.env.VITE_API_URL || "https://chatkie.onrender.com";
+const apiBaseUrl =  "http://localhost:8000"; 
+// "https://chatkie.onrender.com" || import.meta.env.VITE_API_URL 
 
 export const axiosInstance = axios.create({
   baseURL: apiBaseUrl,

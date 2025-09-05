@@ -7,7 +7,7 @@ const ChatInput = () => {
   const [text,setText]=useState("");
   const [imagePreview,setImagePreview]=useState<string | null>(null);
   const fileInputRef= useRef<HTMLInputElement>(null);
-  const {sendMessage} = useChatStore();
+  const {sendMessage,sendingMessage} = useChatStore();
 
   const handleImageChange=(e: React.ChangeEvent<HTMLInputElement>)=>{
     const file = e.target.files?.[0];
@@ -93,8 +93,8 @@ const ChatInput = () => {
           </button>
         </div>
         <button onClick={handleSendMessage} type="button" className='btn btn-sm btn-square btn-primary'
-        disabled={!text.trim() && !imagePreview}>
-          <Send size={22} />
+        disabled={!text.trim() && !imagePreview && sendingMessage}>
+          <Send size={24} />
         </button>
       </form>
     </div>

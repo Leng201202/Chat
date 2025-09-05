@@ -11,7 +11,7 @@ import cors from 'cors';
 dotenv.config();
 const app = express();
 app.set('trust proxy', 1); // trust first proxy
-const allowedOrigins=['https://chatkie.netlify.app','http://localhost:3000','http://localhost:5000'];
+const allowedOrigins=['https://chatkie.netlify.app','http://localhost:3000','http://localhost:5000','http://localhost:5173/'];
 
 const corsOptions = {
     origin(origin,cb){
