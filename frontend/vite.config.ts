@@ -10,7 +10,7 @@ export default defineConfig({
     strictPort: true, // This will throw an error if the port is already in use
     proxy:{
       '/api': {
-        target: 'https://chatkie.onrender.com',
+        target: 'http://localhost:8000',
         changeOrigin: true,
       }
     }

@@ -1,91 +1,42 @@
-import express from 'express';
-import authRoute from './routes/auth.route.js';
-import messageRoute from './routes/message.route.js';
-import dotenv from 'dotenv';
-import mongoose from 'mongoose';
-import { connectDB } from './lib/db.js';
-import cookieParser from 'cookie-parser';
-import cors from 'cors';
-import { io, app, server } from './lib/socket.js';
-import  path  from 'path';
+import express from "express";
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+
+import path from "path";
+
+import { connectDB } from "./lib/db.js";
+
+import authRoutes from "./routes/auth.route.js";
+import messageRoutes from "./routes/message.route.js";
+import { app, server } from "./lib/socket.js";
 
 dotenv.config();
-const __dirname = path.resolve(); // Get current directory
-app.set('trust proxy', 1); // trust first proxy
-const allowedOrigins=['https://chatkie.netlify.app','http://localhost:3000','http://localhost:5000','http://localhost:5173/'];
 
-const corsOptions = {
-    origin(origin,cb){
-        if(!origin) return cb(null,true);
-        const ok=allowedOrigins.some(o=>o instanceof RegExp ? o.test(origin) : o===origin);
-        cb(ok ? null : new Error('Not allowed by CORS'),ok);
-    },
-    credentials:true,
-    methods:['GET','POST','PUT','DELETE'],
-    allowedHeaders:['Content-Type','Authorization'] 
-};
+const PORT = process.env.PORT;
+const __dirname = path.resolve();
 
-// Enable CORS with configured options
-app.use(cors(corsOptions));
+app.use(express.json());
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 
+app.use("/api/auth", authRoutes);
+app.use("/api/messages", messageRoutes);
 
-// Middleware for parsing JSON and URL-encoded bodies with increased limits for base64 image uploads
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true, limit: '5mb' }));
-app.use(cookieParser()); 
-const PORT = process.env.PORT || 8000;
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-// Routes
-app.use('/api/auth', authRoute);
-// NOTE: missing leading slash caused 404 for /api/messages/* endpoints
-app.use('/api/messages', messageRoute);
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../frontend/dist')));
-    app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
-    });
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+  });
 }
-// Health check endpoint to verify database connection
-app.get('/health', async (req, res) => {
-    try {
-        // Check if mongoose is connected
-        if (mongoose.connection.readyState === 1) {
-            return res.status(200).json({ 
-                status: 'ok',
-                message: 'Database connection is healthy',
-                dbHost: mongoose.connection.host
-            });
-        } else {
-            return res.status(500).json({ 
-                status: 'error',
-                message: 'Database connection is not established',
-                readyState: mongoose.connection.readyState
-            });
-        }
-    } catch (error) {
-        return res.status(500).json({ 
-            status: 'error',
-            message: 'Error checking database connection',
-            error: error.message
-        });
-    }
+
+server.listen(PORT, () => {
+  console.log("server is running on PORT:" + PORT);
+  connectDB();
 });
-
-// Start server after attempting database connection
-const startServer = async () => {
-    try {
-        await connectDB();
-        server.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
-        });
-    } catch (error) {
-        console.error('Failed to start server:', error.message);
-        // Retry connection after delay in development
-        if (process.env.NODE_ENV !== 'production') {
-            console.log('Retrying database connection in 5 seconds...');
-            setTimeout(startServer, 5000);
-        }
-    }
-};
-
-startServer();
