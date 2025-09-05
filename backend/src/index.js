@@ -10,7 +10,7 @@ import cors from 'cors';
 dotenv.config();
 const app = express();
 app.use(cors({
-    origin: 'http://localhost:5000',
+    origin: 'https://chatkie.netlify.app/',
     credentials: true,
 }));
 // Middleware for parsing JSON and URL-encoded bodies with increased limits for base64 image uploads
