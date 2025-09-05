@@ -35,8 +35,8 @@ interface ChatStoreState {
   getUsers: () => Promise<void>;
   getMessages: (userId: string) => Promise<void>;
   sendMessage: (messageData: SendMessageData) => Promise<void>;
-//   subscribeToMessages: () => void;
-//   unsubscribeFromMessages: () => void;
+  subscribeToMessages: () => void;
+  unsubscribeFromMessages: () => void;
   setSelectedUser: (selectedUser: ChatUser | null) => void;
 }
 
@@ -106,27 +106,23 @@ sendMessage: async (messageData: SendMessageData) => {
       set({ sendingMessage: false });
     }
   },
+  subscribeToMessages: () => {
+    const selectedUser = get().selectedUser;
+    if(!selectedUser) return;
+    const socket = userAuthStore.getState().socket;
+    //optimize later
+    
+    socket?.on("newMessage", (newMessage: Message) => {
+      const isMessageFromSelectedUser = newMessage.senderId === selectedUser._id;
+      if(!isMessageFromSelectedUser) return; // only add if the message is from the selected user
+      set({messages: [...get().messages, newMessage]});
+    })
 
-//   subscribeToMessages: () => {
-//     const { selectedUser } = get();
-//     if (!selectedUser) return;
-
-//     const socket = userAuthStore.getState().socket;
-
-//     socket.on("newMessage", (newMessage) => {
-//       const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
-//       if (!isMessageSentFromSelectedUser) return;
-
-//       set({
-//         messages: [...get().messages, newMessage],
-//       });
-//     });
-//   },
-
-//   unsubscribeFromMessages: () => {
-//     const socket = userAuthStore.getState().socket;
-//     socket.off("newMessage");
-//   },
+  },
+  unsubscribeFromMessages: () => {
+    const socket = userAuthStore.getState().socket;
+    socket?.off("newMessage"); 
+  },
 
   setSelectedUser: (selectedUser) => set({ selectedUser }),
 }));

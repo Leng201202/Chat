@@ -6,10 +6,10 @@ import mongoose from 'mongoose';
 import { connectDB } from './lib/db.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-
+import { io, app, server } from './lib/socket.js';
 
 dotenv.config();
-const app = express();
+
 app.set('trust proxy', 1); // trust first proxy
 const allowedOrigins=['https://chatkie.netlify.app','http://localhost:3000','http://localhost:5000','http://localhost:5173/'];
 
@@ -73,7 +73,7 @@ app.get('/health', async (req, res) => {
 const startServer = async () => {
     try {
         await connectDB();
-        app.listen(PORT, () => {
+        server.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
         });
     } catch (error) {
